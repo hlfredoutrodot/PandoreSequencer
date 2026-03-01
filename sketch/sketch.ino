@@ -11,7 +11,7 @@
  * | '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |
  * '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------'
  *
- * Version de développement 0.0.5
+ * Version de développement 0.0.7
  *
  * Code source officiel du séquenceur d'un projet de boite à rythme open-source modulable.
  * Développé en France par Hélie Frédout Rodot.
@@ -133,7 +133,7 @@ int timedivider = 4;
 int stepnoten;
 int previousstepnoten;
 
-int initMillis = 0;
+int previousmillis;
 int CursorBlinkCount = 1;
 
 //définition des variables nécessaires à la navigation en menus
@@ -965,25 +965,28 @@ void sequencer() {
       delay(10);
     }
   } else {
-    delay(stepduration / 24);
-    tempcount++;
-    switch (tempcount) {
-      case 1:
-        if (playing) { step(); }
-        break;
-      case 3:
-        if (timedivider == 8) {
+
+    if (millis() >= previousmillis) {
+      previousmillis = millis() + stepduration / 24;
+      tempcount++;
+      switch (tempcount) {
+        case 1:
           if (playing) { step(); }
-        }
-        break;
-      case 6:
-        if (timedivider > 2) { tempcount = 0; }
-        break;
-      case 12:
-        tempcount = 0;
-        break;
+          break;
+        case 3:
+          if (timedivider == 8) {
+            if (playing) { step(); }
+          }
+          break;
+        case 6:
+          if (timedivider > 2) { tempcount = 0; }
+          break;
+        case 12:
+          tempcount = 0;
+          break;
+      }
+      MIDI.sendClock();
     }
-    MIDI.sendClock();
   }
   yield();
 }
