@@ -132,7 +132,7 @@ int stepduration;
 int timedivider = 4;
 int stepnoten;
 int previousstepnoten;
-int pattern1lenght;
+int pattern1lenght = 16;
 
 int previousmillis;
 int CursorBlinkCount = 1;
@@ -153,7 +153,7 @@ int Out3CH;
 int Out4CH;
 int Out5CH;
 
-int Track1List[16];
+int Track1List[17];
 
 void setup() {
 
@@ -430,7 +430,7 @@ void loop() {
   }
 
   if (BTNup.isClicked()) {  //Action du bouton haut
-    if (GMenu > 0) {
+    if (GMenu == 1) {
       if (Track1List[CursorCoord] < 11) {
         Track1List[CursorCoord] = Track1List[CursorCoord] + 1;
       }
@@ -446,7 +446,7 @@ void loop() {
   }
 
   if (BTNdown.isClicked()) {  //Action du bouton bas
-    if (GMenu > 0) {
+    if (GMenu == 1) {
       if (Track1List[CursorCoord] > 0) {
         Track1List[CursorCoord] = Track1List[CursorCoord] - 1;
       }
@@ -963,7 +963,7 @@ void step() {
     previousstepnoten = stepnoten - 1;
   }
 
-  if (stepnoten == pattern1lenght + 1) {
+  if (stepnoten > pattern1lenght) {
     stepnoten = 1;
     previousstepnoten = pattern1lenght;
   }
@@ -1074,14 +1074,16 @@ void midisend() {
     MIDI.sendNoteOff(60, 0, Out5CH);
   }
 
-  if (Track1List[stepnoten] != 0) {
-    if (Track1List[previousstepnoten] != Track1List[stepnoten]) {
-      MIDI.sendNoteOff(Track1List[previousstepnoten] + 59, 0, Out1CH);
+  if (Track1List[stepnoten - 1] != 0) {
+
+    if (Track1List[previousstepnoten -1] != Track1List[stepnoten]) {
+      MIDI.sendNoteOff(Track1List[previousstepnoten - 1] + 59, 0, Out1CH);
     }
-    MIDI.sendNoteOff(Track1List[stepnoten] + 59, 0, Out1CH);
-    MIDI.sendNoteOn(Track1List[stepnoten] + 59, 127, Out1CH);
+    MIDI.sendNoteOff(Track1List[stepnoten - 1] + 59, 0, Out1CH);
+    MIDI.sendNoteOn(Track1List[stepnoten - 1] + 59, 127, Out1CH);
+
   } else {
-    MIDI.sendNoteOff(Track1List[previousstepnoten] + 59, 0, Out1CH);
-    MIDI.sendNoteOff(Track1List[stepnoten] + 59, 0, Out1CH);
+    MIDI.sendNoteOff(Track1List[previousstepnoten - 1] + 59, 0, Out1CH);
+    MIDI.sendNoteOff(Track1List[stepnoten - 1] + 59, 0, Out1CH);
   }
 }
