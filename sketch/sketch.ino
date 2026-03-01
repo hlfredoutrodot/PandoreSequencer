@@ -132,6 +132,7 @@ int stepduration;
 int timedivider = 4;
 int stepnoten;
 int previousstepnoten;
+int pattern1lenght;
 
 int previousmillis;
 int CursorBlinkCount = 1;
@@ -150,6 +151,7 @@ int Out1CH;
 int Out2CH;
 int Out3CH;
 int Out4CH;
+int Out5CH;
 
 int Track1List[16];
 
@@ -292,12 +294,14 @@ void loop() {
         stepnoten = 0;
         tempcount = 0;
         analogWrite(tempoled, 0);
+        displayimmediate();
       } else {
         MIDI.sendStart();
         playing = true;
         stepn = 0;
         stepnoten = 0;
         tempcount = 0;
+        displayimmediate();
       }
     }
     if (GMenu != 0) {
@@ -318,7 +322,7 @@ void loop() {
   }
 
   if (BTNmin.isClicked()) {  //Action du bouton min
-    if (GMenu == 1) {
+    if (GMenu > 0) {
       if (mmenu != 0) {
         if (CursorCoord > 0) {
           CursorCoord = CursorCoord - 1;
@@ -355,6 +359,11 @@ void loop() {
           Out4CH = Out4CH - 1;
         }
       }
+      if (mmenu == -5) {
+        if (Out5CH > 1) {
+          Out5CH = Out5CH - 1;
+        }
+      }
     }
 
     display();
@@ -368,7 +377,7 @@ void loop() {
 
   if (BTNmax.isClicked()) {  //Action du bouton max
 
-    if (GMenu == 1) {
+    if (GMenu > 0) {
       if (mmenu != 0) {
         if (CursorCoord < 15) {
           CursorCoord = CursorCoord + 1;
@@ -404,6 +413,11 @@ void loop() {
           Out4CH = Out4CH + 1;
         }
       }
+      if (mmenu == -5) {
+        if (Out5CH < 16) {
+          Out5CH = Out5CH + 1;
+        }
+      }
     }
     display();
   }
@@ -416,7 +430,7 @@ void loop() {
   }
 
   if (BTNup.isClicked()) {  //Action du bouton haut
-    if (GMenu == 1) {
+    if (GMenu > 0) {
       if (Track1List[CursorCoord] < 11) {
         Track1List[CursorCoord] = Track1List[CursorCoord] + 1;
       }
@@ -432,7 +446,7 @@ void loop() {
   }
 
   if (BTNdown.isClicked()) {  //Action du bouton bas
-    if (GMenu == 1) {
+    if (GMenu > 0) {
       if (Track1List[CursorCoord] > 0) {
         Track1List[CursorCoord] = Track1List[CursorCoord] - 1;
       }
@@ -601,8 +615,8 @@ void displayimmediate() {
 
   if (GMenu == -2) {
 
-    if (mmenu < -4) {
-      mmenu = -4;
+    if (mmenu < -5) {
+      mmenu = -5;
     }
 
     if (mmenu == 0) {
@@ -626,7 +640,7 @@ void displayimmediate() {
 
     if (mmenu == -1) {
       lcd.setCursor(0, 1);
-      lcd.print("2.Out1 CH");
+      lcd.print("2.Nte1 CH");
       if (Out1CH < 10) {
         lcd.setCursor(12, 1);
         lcd.print("<0");
@@ -641,7 +655,7 @@ void displayimmediate() {
     }
     if (mmenu == -2) {
       lcd.setCursor(0, 1);
-      lcd.print("3.Out2 CH");
+      lcd.print("3.Prc1 CH");
       if (Out1CH < 10) {
         lcd.setCursor(12, 1);
         lcd.print("<0");
@@ -656,7 +670,7 @@ void displayimmediate() {
     }
     if (mmenu == -3) {
       lcd.setCursor(0, 1);
-      lcd.print("4.Out3 CH");
+      lcd.print("4.Prc2 CH");
       if (Out1CH < 10) {
         lcd.setCursor(12, 1);
         lcd.print("<0");
@@ -671,7 +685,7 @@ void displayimmediate() {
     }
     if (mmenu == -4) {
       lcd.setCursor(0, 1);
-      lcd.print("5.Out4 CH");
+      lcd.print("5.Prc3 CH");
       if (Out1CH < 10) {
         lcd.setCursor(12, 1);
         lcd.print("<0");
@@ -681,6 +695,21 @@ void displayimmediate() {
         lcd.setCursor(12, 1);
         lcd.print("<");
         lcd.print(Out4CH);
+        lcd.print(">");
+      }
+    }
+    if (mmenu == -5) {
+      lcd.setCursor(0, 1);
+      lcd.print("5.Prc4 CH");
+      if (Out5CH < 10) {
+        lcd.setCursor(12, 1);
+        lcd.print("<0");
+        lcd.print(Out5CH);
+        lcd.print(">");
+      } else {
+        lcd.setCursor(12, 1);
+        lcd.print("<");
+        lcd.print(Out5CH);
         lcd.print(">");
       }
     }
@@ -718,6 +747,7 @@ void save() {
   dueFlashStorage.write(3, Out2CH);
   dueFlashStorage.write(4, Out3CH);
   dueFlashStorage.write(5, Out4CH);
+  dueFlashStorage.write(6, Out5CH);
 }
 
 void recover() {
@@ -734,19 +764,23 @@ void recover() {
 
   //Out1CH
   if (dueFlashStorage.read(2) == 255) {
-    dueFlashStorage.write(2, 1);
+    dueFlashStorage.write(2, 9);
   }
   //Out2CH
   if (dueFlashStorage.read(3) == 255) {
-    dueFlashStorage.write(3, 2);
+    dueFlashStorage.write(3, 1);
   }
   //Out3CH
   if (dueFlashStorage.read(4) == 255) {
-    dueFlashStorage.write(4, 3);
+    dueFlashStorage.write(4, 2);
   }
   //Out4CH
   if (dueFlashStorage.read(5) == 255) {
-    dueFlashStorage.write(5, 4);
+    dueFlashStorage.write(5, 3);
+  }
+  //Out5CH
+  if (dueFlashStorage.read(6) == 255) {
+    dueFlashStorage.write(6, 4);
   }
 
   tempo = dueFlashStorage.read(0);
@@ -755,6 +789,7 @@ void recover() {
   Out2CH = dueFlashStorage.read(3);
   Out3CH = dueFlashStorage.read(4);
   Out4CH = dueFlashStorage.read(5);
+  Out5CH = dueFlashStorage.read(6);
 }
 
 void customChar() {
@@ -923,12 +958,14 @@ void step() {
 
 
   //partie concernant le séquenceur de note
-  if (stepnoten <= 15) {
+  if (stepnoten <= pattern1lenght) {
     stepnoten++;
+    previousstepnoten = stepnoten - 1;
   }
 
-  if (stepnoten == 16) {
-    stepnoten = 0;
+  if (stepnoten == pattern1lenght + 1) {
+    stepnoten = 1;
+    previousstepnoten = pattern1lenght;
   }
 
   midisend();
@@ -1017,30 +1054,30 @@ void midisend() {
   }
 
   if (hit2) {
-    MIDI.sendNoteOff(60, 0, Out2CH);
-    MIDI.sendNoteOn(60, 127, Out2CH);
-  } else {
-    MIDI.sendNoteOff(60, 0, 2);
-  }
-
-  if (hit3) {
     MIDI.sendNoteOff(60, 0, Out3CH);
     MIDI.sendNoteOn(60, 127, Out3CH);
   } else {
     MIDI.sendNoteOff(60, 0, Out3CH);
   }
 
-  if (hit4) {
+  if (hit3) {
     MIDI.sendNoteOff(60, 0, Out4CH);
     MIDI.sendNoteOn(60, 127, Out4CH);
   } else {
     MIDI.sendNoteOff(60, 0, Out4CH);
   }
 
+  if (hit4) {
+    MIDI.sendNoteOff(60, 0, Out5CH);
+    MIDI.sendNoteOn(60, 127, Out5CH);
+  } else {
+    MIDI.sendNoteOff(60, 0, Out5CH);
+  }
 
-  previousstepnoten = stepnoten - 1;
   if (Track1List[stepnoten] != 0) {
-    MIDI.sendNoteOff(Track1List[previousstepnoten] + 59, 0, Out1CH);
+    if (Track1List[previousstepnoten] != Track1List[stepnoten]) {
+      MIDI.sendNoteOff(Track1List[previousstepnoten] + 59, 0, Out1CH);
+    }
     MIDI.sendNoteOff(Track1List[stepnoten] + 59, 0, Out1CH);
     MIDI.sendNoteOn(Track1List[stepnoten] + 59, 127, Out1CH);
   } else {
