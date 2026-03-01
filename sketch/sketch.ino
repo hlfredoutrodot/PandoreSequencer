@@ -112,15 +112,6 @@ PushButton BTNmax(4);
 PushButton BTNup(11);
 PushButton BTNdown(12);
 
-int stepn;   //stocke le numéro du pas en cours de lecture
-int stepn1;  //stocke le nombre du pas en cours de lecture pour la rangée 1
-int stepn2;  //stocke le nombre du pas en cours de lecture pour la rangée 2
-int stepn3;  //stocke le nombre du pas en cours de lecture pour la rangée 3
-int stepn4;  //stocke le nombre du pas en cours de lecture pour la rangée 4
-bool hit1;   //vérifie si le la rangée 1 doit émettre un son sur le pas en cours
-bool hit2;   //vérifie si le la rangée 2 doit émettre un son sur le pas en cours
-bool hit3;   //vérifie si le la rangée 3 doit émettre un son sur le pas en cours
-bool hit4;   //vérifie si le la rangée 4 doit émettre un son sur le pas en cours
 
 bool switchstate;
 
@@ -134,6 +125,7 @@ int stepduration;
 int timedivider = 4;
 
 int ntepat1lenght = 16;
+int ntepat1list[17];
 int ntepat1n;
 int previousntepat1n;
 
@@ -149,7 +141,6 @@ int GMenu = 0;
 int mmenu = 0;
 int CursorCoord = 0;
 bool showCursor = false;
-int CursorSpeed = 250;
 
 //définiton des variables de configuration (configurées automatiquement lors du premier démarrage du code, plus tard dans recover())
 int tempo;     //stocke le tempo modifiable par cmd
@@ -159,8 +150,6 @@ int prcpat1CH;
 int Out3CH;
 int Out4CH;
 int Out5CH;
-
-int ntepat1list[17];
 
 void setup() {
 
@@ -297,7 +286,6 @@ void loop() {
         MIDI.sendNoteOff(60, 0, Out3CH);
         MIDI.sendNoteOff(60, 0, Out4CH);
         playing = false;
-        stepn = 0;
         ntepat1n = 0;
         prcpat1n = 0;
         tempcount = 0;
@@ -306,7 +294,6 @@ void loop() {
       } else {
         MIDI.sendStart();
         playing = true;
-        stepn = 0;
         ntepat1n = 0;
         tempcount = 0;
         displayimmediate();
@@ -827,16 +814,6 @@ void customChar() {
 
 void step() {
 
-  if ((stepn % 2) == 0) {
-    if (playing) {
-      analogWrite(tempoled, 1);
-    } else {
-      analogWrite(tempoled, 0);
-    }
-  } else {
-    analogWrite(tempoled, 0);
-  }
-
   //avance des pas du séquenceur de notes numéro 1
   if (ntepat1n <= ntepat1lenght) {
     ntepat1n++;
@@ -862,9 +839,11 @@ void step() {
 
   CursorBlinkCount++;
   if (CursorBlinkCount == 1) {
+    analogWrite(tempoled, 1);
     displayimmediate();
   }
   if (CursorBlinkCount == 3) {
+    analogWrite(tempoled, 0);
     cursor();
   }
   if (CursorBlinkCount > 4) {
