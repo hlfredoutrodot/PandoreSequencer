@@ -122,6 +122,8 @@ bool hit2;   //vérifie si le la rangée 2 doit émettre un son sur le pas en co
 bool hit3;   //vérifie si le la rangée 3 doit émettre un son sur le pas en cours
 bool hit4;   //vérifie si le la rangée 4 doit émettre un son sur le pas en cours
 
+bool switchstate;
+
 int charCreated = 1;
 bool doblink;
 int tempcount = 0;
@@ -130,9 +132,14 @@ int timeduration;     //stocke la duréee d'un temps en fonction du tempo
 int quarterduration;  //stocke la durée d'un quart de temps en fonction du tempo
 int stepduration;
 int timedivider = 4;
-int stepnoten;
-int previousstepnoten;
-int pattern1lenght = 16;
+
+int ntepat1lenght = 16;
+int ntepat1n;
+int previousntepat1n;
+
+int prcpat1lenght = 32;
+int prcpat1n;
+int previousprcpat1n;
 
 int previousmillis;
 int CursorBlinkCount = 1;
@@ -147,13 +154,13 @@ int CursorSpeed = 250;
 //définiton des variables de configuration (configurées automatiquement lors du premier démarrage du code, plus tard dans recover())
 int tempo;     //stocke le tempo modifiable par cmd
 bool syncuse;  //stocke la position de l'interrupteur commandant la synchronisation
-int Out1CH;
-int Out2CH;
+int ntepat1CH;
+int prcpat1CH;
 int Out3CH;
 int Out4CH;
 int Out5CH;
 
-int Track1List[17];
+int ntepat1list[17];
 
 void setup() {
 
@@ -285,13 +292,14 @@ void loop() {
     if (GMenu == 0) {
       if (playing) {
         MIDI.sendStop();
-        MIDI.sendNoteOff(60, 0, Out1CH);
-        MIDI.sendNoteOff(60, 0, Out2CH);
+        MIDI.sendNoteOff(60, 0, ntepat1CH);
+        MIDI.sendNoteOff(60, 0, prcpat1CH);
         MIDI.sendNoteOff(60, 0, Out3CH);
         MIDI.sendNoteOff(60, 0, Out4CH);
         playing = false;
         stepn = 0;
-        stepnoten = 0;
+        ntepat1n = 0;
+        prcpat1n = 0;
         tempcount = 0;
         analogWrite(tempoled, 0);
         displayimmediate();
@@ -299,7 +307,7 @@ void loop() {
         MIDI.sendStart();
         playing = true;
         stepn = 0;
-        stepnoten = 0;
+        ntepat1n = 0;
         tempcount = 0;
         displayimmediate();
       }
@@ -340,13 +348,13 @@ void loop() {
 
     if (GMenu == -2) {
       if (mmenu == -1) {
-        if (Out1CH > 1) {
-          Out1CH = Out1CH - 1;
+        if (ntepat1CH > 1) {
+          ntepat1CH = ntepat1CH - 1;
         }
       }
       if (mmenu == -2) {
-        if (Out2CH > 1) {
-          Out2CH = Out2CH - 1;
+        if (prcpat1CH > 1) {
+          prcpat1CH = prcpat1CH - 1;
         }
       }
       if (mmenu == -3) {
@@ -394,13 +402,13 @@ void loop() {
     }
     if (GMenu == -2) {
       if (mmenu == -1) {
-        if (Out1CH < 16) {
-          Out1CH = Out1CH + 1;
+        if (ntepat1CH < 16) {
+          ntepat1CH = ntepat1CH + 1;
         }
       }
       if (mmenu == -2) {
-        if (Out2CH < 16) {
-          Out2CH = Out2CH + 1;
+        if (prcpat1CH < 16) {
+          prcpat1CH = prcpat1CH + 1;
         }
       }
       if (mmenu == -3) {
@@ -431,8 +439,8 @@ void loop() {
 
   if (BTNup.isClicked()) {  //Action du bouton haut
     if (GMenu == 1) {
-      if (Track1List[CursorCoord] < 11) {
-        Track1List[CursorCoord] = Track1List[CursorCoord] + 1;
+      if (ntepat1list[CursorCoord] < 11) {
+        ntepat1list[CursorCoord] = ntepat1list[CursorCoord] + 1;
       }
     }
     if (mmenu == 0) {
@@ -447,8 +455,8 @@ void loop() {
 
   if (BTNdown.isClicked()) {  //Action du bouton bas
     if (GMenu == 1) {
-      if (Track1List[CursorCoord] > 0) {
-        Track1List[CursorCoord] = Track1List[CursorCoord] - 1;
+      if (ntepat1list[CursorCoord] > 0) {
+        ntepat1list[CursorCoord] = ntepat1list[CursorCoord] - 1;
       }
       if (mmenu == 0) {
         GMenu = GMenu - 1;
@@ -490,32 +498,32 @@ void displayimmediate() {
     if (mmenu != 0) {
       showCursor = true;
       for (int t = 0; t < 17; t++) {
-        if (Track1List[t] < 5) {
+        if (ntepat1list[t] < 5) {
           lcd.setCursor(t, 0);
           lcd.write(byte(0));
           lcd.setCursor(t, 1);
-          lcd.write(byte(Track1List[t] + 1));
+          lcd.write(byte(ntepat1list[t] + 1));
         }
-        if (Track1List[t] == 0) {
+        if (ntepat1list[t] == 0) {
           lcd.setCursor(t, 0);
           lcd.write(byte(0));
           lcd.setCursor(t, 1);
           lcd.write(byte(0));
         }
-        if (Track1List[t] == 5) {
+        if (ntepat1list[t] == 5) {
           lcd.setCursor(t, 0);
           lcd.write(byte(0));
           lcd.setCursor(t, 1);
           lcd.write(byte(1));
         }
 
-        if (Track1List[t] > 5) {
+        if (ntepat1list[t] > 5) {
           lcd.setCursor(t, 0);
-          lcd.write(byte(Track1List[t] - 4));
+          lcd.write(byte(ntepat1list[t] - 4));
           lcd.setCursor(t, 1);
           lcd.write(byte(0));
         }
-        if (Track1List[t] == 11) {
+        if (ntepat1list[t] == 11) {
           lcd.setCursor(t, 0);
           lcd.write(byte(1));
           lcd.setCursor(t, 1);
@@ -641,37 +649,37 @@ void displayimmediate() {
     if (mmenu == -1) {
       lcd.setCursor(0, 1);
       lcd.print("2.Nte1 CH");
-      if (Out1CH < 10) {
+      if (ntepat1CH < 10) {
         lcd.setCursor(12, 1);
         lcd.print("<0");
-        lcd.print(Out1CH);
+        lcd.print(ntepat1CH);
         lcd.print(">");
       } else {
         lcd.setCursor(12, 1);
         lcd.print("<");
-        lcd.print(Out1CH);
+        lcd.print(ntepat1CH);
         lcd.print(">");
       }
     }
     if (mmenu == -2) {
       lcd.setCursor(0, 1);
       lcd.print("3.Prc1 CH");
-      if (Out1CH < 10) {
+      if (ntepat1CH < 10) {
         lcd.setCursor(12, 1);
         lcd.print("<0");
-        lcd.print(Out2CH);
+        lcd.print(prcpat1CH);
         lcd.print(">");
       } else {
         lcd.setCursor(12, 1);
         lcd.print("<");
-        lcd.print(Out2CH);
+        lcd.print(prcpat1CH);
         lcd.print(">");
       }
     }
     if (mmenu == -3) {
       lcd.setCursor(0, 1);
       lcd.print("4.Prc2 CH");
-      if (Out1CH < 10) {
+      if (ntepat1CH < 10) {
         lcd.setCursor(12, 1);
         lcd.print("<0");
         lcd.print(Out3CH);
@@ -686,7 +694,7 @@ void displayimmediate() {
     if (mmenu == -4) {
       lcd.setCursor(0, 1);
       lcd.print("5.Prc3 CH");
-      if (Out1CH < 10) {
+      if (ntepat1CH < 10) {
         lcd.setCursor(12, 1);
         lcd.print("<0");
         lcd.print(Out4CH);
@@ -743,8 +751,8 @@ void displayimmediate() {
 void save() {
   dueFlashStorage.write(0, tempo);
   dueFlashStorage.write(1, syncuse);
-  dueFlashStorage.write(2, Out1CH);
-  dueFlashStorage.write(3, Out2CH);
+  dueFlashStorage.write(2, ntepat1CH);
+  dueFlashStorage.write(3, prcpat1CH);
   dueFlashStorage.write(4, Out3CH);
   dueFlashStorage.write(5, Out4CH);
   dueFlashStorage.write(6, Out5CH);
@@ -762,11 +770,11 @@ void recover() {
     dueFlashStorage.write(1, 0);
   }
 
-  //Out1CH
+  //ntepat1CH
   if (dueFlashStorage.read(2) == 255) {
     dueFlashStorage.write(2, 9);
   }
-  //Out2CH
+  //prcpat1CH
   if (dueFlashStorage.read(3) == 255) {
     dueFlashStorage.write(3, 1);
   }
@@ -785,8 +793,8 @@ void recover() {
 
   tempo = dueFlashStorage.read(0);
   syncuse = dueFlashStorage.read(1);
-  Out1CH = dueFlashStorage.read(2);
-  Out2CH = dueFlashStorage.read(3);
+  ntepat1CH = dueFlashStorage.read(2);
+  prcpat1CH = dueFlashStorage.read(3);
   Out3CH = dueFlashStorage.read(4);
   Out4CH = dueFlashStorage.read(5);
   Out5CH = dueFlashStorage.read(6);
@@ -829,144 +837,26 @@ void step() {
     analogWrite(tempoled, 0);
   }
 
-  //partie contrôlant les pas de l'interrupteur, à voir si je laisse
-  //comptage du pas en cours
-  if (stepn < 9) {
-    stepn++;
+  //avance des pas du séquenceur de notes numéro 1
+  if (ntepat1n <= ntepat1lenght) {
+    ntepat1n++;
+    previousntepat1n = ntepat1n - 1;
   }
 
-  if (stepn == 9) {
-    stepn = 1;
+  if (ntepat1n > ntepat1lenght) {
+    ntepat1n = 1;
+    previousntepat1n = ntepat1lenght;
   }
 
-  //correspondance du pas en cours avec les références de lecture des interrupteurs
-  stepn1 = stepn + 10;
-  stepn2 = stepn + 20;
-  stepn3 = stepn + 30;
-  stepn4 = stepn + 40;
-
-  //vérifie l'état de l'interrupteur concerné par le pas
-  switch (stepn1) {
-    case 11:
-      hit1 = !digitalRead(i11);
-      break;
-    case 12:
-      hit1 = !digitalRead(i12);
-      break;
-    case 13:
-      hit1 = !digitalRead(i13);
-      break;
-    case 14:
-      hit1 = !digitalRead(i14);
-      break;
-    case 15:
-      hit1 = !digitalRead(i15);
-      break;
-    case 16:
-      hit1 = !digitalRead(i16);
-      break;
-    case 17:
-      hit1 = !digitalRead(i17);
-      break;
-    case 18:
-      hit1 = !digitalRead(i18);
-      break;
+  //avance les pas du séquenceur de percussion numéro 1
+  if (prcpat1n <= prcpat1lenght) {
+    prcpat1n++;
   }
 
-  switch (stepn2) {
-    case 21:
-      hit2 = !digitalRead(i21);
-      break;
-    case 22:
-      hit2 = !digitalRead(i22);
-      break;
-    case 23:
-      hit2 = !digitalRead(i23);
-      break;
-    case 24:
-      hit2 = !digitalRead(i24);
-      break;
-    case 25:
-      hit2 = !digitalRead(i25);
-      break;
-    case 26:
-      hit2 = !digitalRead(i26);
-      break;
-    case 27:
-      hit2 = !digitalRead(i27);
-      break;
-    case 28:
-      hit2 = !digitalRead(i28);
-      break;
+  if (prcpat1n > prcpat1lenght) {
+    prcpat1n = 1;
   }
 
-  switch (stepn3) {
-    case 31:
-      hit3 = !digitalRead(i31);
-      break;
-    case 32:
-      hit3 = !digitalRead(i32);
-      break;
-    case 33:
-      hit3 = !digitalRead(i33);
-      break;
-    case 34:
-      hit3 = !digitalRead(i34);
-      break;
-    case 35:
-      hit3 = !digitalRead(i35);
-      break;
-    case 36:
-      hit3 = !digitalRead(i36);
-      break;
-    case 37:
-      hit3 = !digitalRead(i37);
-      break;
-    case 38:
-      hit3 = !digitalRead(i38);
-      break;
-  }
-
-  switch (stepn4) {
-    case 41:
-      hit4 = !digitalRead(i41);
-      break;
-    case 42:
-      hit4 = !digitalRead(i42);
-      break;
-    case 43:
-      hit4 = !digitalRead(i43);
-      break;
-    case 44:
-      hit4 = !digitalRead(i44);
-      break;
-    case 45:
-      hit4 = !digitalRead(i45);
-      break;
-    case 46:
-      hit4 = !digitalRead(i46);
-      break;
-    case 47:
-      hit4 = !digitalRead(i47);
-      break;
-    case 48:
-      hit4 = !digitalRead(i48);
-      break;
-  }
-
-
-
-
-  //partie concernant le séquenceur de note
-  if (stepnoten <= pattern1lenght) {
-    stepnoten++;
-    previousstepnoten = stepnoten - 1;
-  }
-
-  if (stepnoten > pattern1lenght) {
-    stepnoten = 1;
-    previousstepnoten = pattern1lenght;
-  }
 
   midisend();
 
@@ -1044,46 +934,127 @@ void cursor() {
   }
 }
 
+bool switchread(int switchn) {
+  switch (switchn) {
+    case 1:
+      switchstate = !digitalRead(i11);
+      break;
+    case 2:
+      switchstate = !digitalRead(i12);
+      break;
+    case 3:
+      switchstate = !digitalRead(i13);
+      break;
+    case 4:
+      switchstate = !digitalRead(i14);
+      break;
+    case 5:
+      switchstate = !digitalRead(i15);
+      break;
+    case 6:
+      switchstate = !digitalRead(i16);
+      break;
+    case 7:
+      switchstate = !digitalRead(i17);
+      break;
+    case 8:
+      switchstate = !digitalRead(i18);
+      break;
+    case 9:
+      switchstate = !digitalRead(i21);
+      break;
+    case 10:
+      switchstate = !digitalRead(i22);
+      break;
+    case 11:
+      switchstate = !digitalRead(i23);
+      break;
+    case 12:
+      switchstate = !digitalRead(i24);
+      break;
+    case 13:
+      switchstate = !digitalRead(i25);
+      break;
+    case 14:
+      switchstate = !digitalRead(i26);
+      break;
+    case 15:
+      switchstate = !digitalRead(i27);
+      break;
+    case 16:
+      switchstate = !digitalRead(i28);
+      break;
+    case 17:
+      switchstate = !digitalRead(i31);
+      break;
+    case 18:
+      switchstate = !digitalRead(i32);
+      break;
+    case 19:
+      switchstate = !digitalRead(i33);
+      break;
+    case 20:
+      switchstate = !digitalRead(i34);
+      break;
+    case 21:
+      switchstate = !digitalRead(i35);
+      break;
+    case 22:
+      switchstate = !digitalRead(i36);
+      break;
+    case 23:
+      switchstate = !digitalRead(i37);
+      break;
+    case 24:
+      switchstate = !digitalRead(i38);
+      break;
+    case 25:
+      switchstate = !digitalRead(i41);
+      break;
+    case 26:
+      switchstate = !digitalRead(i42);
+      break;
+    case 27:
+      switchstate = !digitalRead(i43);
+      break;
+    case 28:
+      switchstate = !digitalRead(i44);
+      break;
+    case 29:
+      switchstate = !digitalRead(i45);
+      break;
+    case 30:
+      switchstate = !digitalRead(i46);
+      break;
+    case 31:
+      switchstate = !digitalRead(i47);
+      break;
+    case 32:
+      switchstate = !digitalRead(i48);
+      break;
+  }
+  return switchstate;
+}
 void midisend() {
   //joue les pas
-  if (hit1) {
-    MIDI.sendNoteOff(60, 0, Out2CH);
-    MIDI.sendNoteOn(60, 127, Out2CH);
-  } else {
-    MIDI.sendNoteOff(60, 0, Out2CH);
-  }
+  if (ntepat1list[ntepat1n - 1] != 0) {
 
-  if (hit2) {
-    MIDI.sendNoteOff(60, 0, Out3CH);
-    MIDI.sendNoteOn(60, 127, Out3CH);
-  } else {
-    MIDI.sendNoteOff(60, 0, Out3CH);
-  }
-
-  if (hit3) {
-    MIDI.sendNoteOff(60, 0, Out4CH);
-    MIDI.sendNoteOn(60, 127, Out4CH);
-  } else {
-    MIDI.sendNoteOff(60, 0, Out4CH);
-  }
-
-  if (hit4) {
-    MIDI.sendNoteOff(60, 0, Out5CH);
-    MIDI.sendNoteOn(60, 127, Out5CH);
-  } else {
-    MIDI.sendNoteOff(60, 0, Out5CH);
-  }
-
-  if (Track1List[stepnoten - 1] != 0) {
-
-    if (Track1List[previousstepnoten -1] != Track1List[stepnoten]) {
-      MIDI.sendNoteOff(Track1List[previousstepnoten - 1] + 59, 0, Out1CH);
+    if (ntepat1list[previousntepat1n - 1] != ntepat1list[ntepat1n]) {
+      MIDI.sendNoteOff(ntepat1list[previousntepat1n - 1] + 59, 0, ntepat1CH);
     }
-    MIDI.sendNoteOff(Track1List[stepnoten - 1] + 59, 0, Out1CH);
-    MIDI.sendNoteOn(Track1List[stepnoten - 1] + 59, 127, Out1CH);
+    MIDI.sendNoteOff(ntepat1list[ntepat1n - 1] + 59, 0, ntepat1CH);
+    MIDI.sendNoteOn(ntepat1list[ntepat1n - 1] + 59, 127, ntepat1CH);
 
   } else {
-    MIDI.sendNoteOff(Track1List[previousstepnoten - 1] + 59, 0, Out1CH);
-    MIDI.sendNoteOff(Track1List[stepnoten - 1] + 59, 0, Out1CH);
+    MIDI.sendNoteOff(ntepat1list[previousntepat1n - 1] + 59, 0, ntepat1CH);
+    MIDI.sendNoteOff(ntepat1list[ntepat1n - 1] + 59, 0, ntepat1CH);
+  }
+
+  Serial.println(switchread(prcpat1n));
+  if (switchread(prcpat1n)) {
+    MIDI.sendNoteOff(60, 0, prcpat1CH);
+    MIDI.sendNoteOn(60, 127, prcpat1CH);
+  } else {
+    MIDI.sendNoteOff(60, 0, prcpat1CH);
   }
 }
