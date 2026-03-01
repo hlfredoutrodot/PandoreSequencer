@@ -453,6 +453,12 @@ void loop() {
 }
 
 void display() {
+  if (!playing) {
+    displayimmediate();
+  }
+}
+
+void displayimmediate() {
 
   yield();
   customChar();
@@ -788,17 +794,6 @@ void step() {
     analogWrite(tempoled, 0);
   }
 
-  CursorBlinkCount++;
-  if (CursorBlinkCount == 1) {
-    cursor(0);
-  }
-  if (CursorBlinkCount == 5) {
-    cursor(1);
-  }
-  if (CursorBlinkCount > 8) {
-    CursorBlinkCount = 0;
-  }
-
   //partie contrôlant les pas de l'interrupteur, à voir si je laisse
   //comptage du pas en cours
   if (stepn < 9) {
@@ -937,6 +932,17 @@ void step() {
   }
 
   midisend();
+
+  CursorBlinkCount++;
+  if (CursorBlinkCount == 1) {
+    displayimmediate();
+  }
+  if (CursorBlinkCount == 3) {
+    cursor();
+  }
+  if (CursorBlinkCount > 4) {
+    CursorBlinkCount = 0;
+  }
 }
 
 void sequencer() {
@@ -991,17 +997,13 @@ void sequencer() {
   yield();
 }
 
-void cursor(int state) {
+void cursor() {
   yield();
   if (showCursor) {
-    if (state == 1) {
-      display();
-    } else {
-      lcd.setCursor(CursorCoord, 0);
-      lcd.print(" ");
-      lcd.setCursor(CursorCoord, 1);
-      lcd.print(" ");
-    }
+    lcd.setCursor(CursorCoord, 0);
+    lcd.print(" ");
+    lcd.setCursor(CursorCoord, 1);
+    lcd.print(" ");
   }
 }
 
