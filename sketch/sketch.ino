@@ -136,11 +136,12 @@ int previousprcpat1n;
 int previousmillis;
 int CursorBlinkCount = 1;
 
-//définition des variables nécessaires à la navigation en menus
+//définition des variables nécessaires à la navigation et l'affichage des menus
 int GMenu = 0;
 int mmenu = 0;
 int CursorCoord = 0;
 bool showCursor = false;
+bool DisplayRequested;
 
 //définiton des variables de configuration (configurées automatiquement lors du premier démarrage du code, plus tard dans recover())
 int tempo;     //stocke le tempo modifiable par cmd
@@ -462,7 +463,10 @@ void loop() {
 }
 
 void display() {
-  if (!playing) {
+  if (playing) {
+    DisplayRequested = true;
+  } else {
+    DisplayRequested = false;
     displayimmediate();
   }
 }
@@ -837,17 +841,31 @@ void step() {
 
   midisend();
 
-  CursorBlinkCount++;
-  if (CursorBlinkCount == 1) {
-    analogWrite(tempoled, 1);
+  if (DisplayRequested) {
+    DisplayRequested = false;
     displayimmediate();
   }
-  if (CursorBlinkCount == 3) {
-    analogWrite(tempoled, 0);
-    cursor();
-  }
-  if (CursorBlinkCount > 4) {
-    CursorBlinkCount = 0;
+
+  CursorBlinkCount++;
+
+  switch (CursorBlinkCount) {
+    case 1:
+      analogWrite(tempoled, 1);
+      if (showCursor) {
+        displayimmediate();
+      }
+      break;
+    case 2:
+      analogWrite(tempoled, 0);
+      break;
+    case 3:
+      analogWrite(tempoled, 1);
+      break;
+    case 4:
+      analogWrite(tempoled, 0);
+      cursor();
+      CursorBlinkCount = 0;
+      break;
   }
 }
 
@@ -898,6 +916,15 @@ void sequencer() {
           break;
       }
       MIDI.sendClock();
+    }
+  }
+
+  if (!playing) {
+    if (showCursor) {
+      cursor();
+      delay(125);
+      displayimmediate();
+      delay(475);
     }
   }
   yield();
