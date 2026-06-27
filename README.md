@@ -2,7 +2,7 @@
 
 Complex MIDI multichannel sequencer for rythms & notes, based on Arduino Due.
 
-[image](https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Pandora_-_John_William_Waterhouse.jpg/330px-Pandora_-_John_William_Waterhouse.jpg)
+![image](https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Pandora_-_John_William_Waterhouse.jpg/330px-Pandora_-_John_William_Waterhouse.jpg)
 
 ## Status
 
